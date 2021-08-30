@@ -28,8 +28,9 @@ class NpEncoder(json.JSONEncoder):
         return super(NpEncoder, self).default(obj)
 
 
-def vgg_to_data_dict(img_dir, file_name):
-    with open(file_name) as f:
+def vgg_to_data_dict(img_dir):
+
+    with open(os.path.join(img_dir, "data.json")) as f:
         annotations = json.load(f)
 
     dataset_dicts = []

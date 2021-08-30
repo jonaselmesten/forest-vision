@@ -2,15 +2,7 @@ import copy
 
 import detectron2.data.transforms as T
 import torch
-from detectron2.data import build_detection_train_loader
 from detectron2.data import detection_utils as utils
-from detectron2.engine import DefaultTrainer
-
-
-class CustomTrainer(DefaultTrainer):
-    @classmethod
-    def build_train_loader(cls, cfg):
-        return build_detection_train_loader(cfg, mapper=image_augmentation)
 
 
 def image_augmentation(dataset_dict):
@@ -19,9 +11,9 @@ def image_augmentation(dataset_dict):
     image = utils.read_image(dataset_dict["file_name"], format="RGB")
 
     transform_list = [
-        T.RandomBrightness(0.9, 1.1),
-        T.RandomContrast(0.8, 1.3),
-        T.RandomSaturation(0.1, 1.2),
+        T.RandomBrightness(0.9, 1.2),
+        T.RandomContrast(0.8, 1.4),
+        T.RandomSaturation(0.1, 1.4),
         T.RandomRotation(angle=[1, 10], expand=False),
         T.RandomFlip(prob=0.5, horizontal=True, vertical=False),
     ]
