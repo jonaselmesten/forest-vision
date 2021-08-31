@@ -9,6 +9,14 @@ import os
 import numpy as np
 from detectron2.structures import BoxMode
 
+categories = [
+            {"supercategory": "stem", "id": 1, "name": "stem-birch"},
+            {"supercategory": "stem", "id": 1, "name": "stem-birch"},
+            {"supercategory": "stem", "id": 2, "name": "stem-pine"},
+            {"supercategory": "crown", "id": 3, "name": "crown-spruce"},
+            {"supercategory": "crown", "id": 4, "name": "crown-birch"},
+            {"supercategory": "crown", "id": 5, "name": "crown-pine"} ]
+
 class_id = {"stem-spruce": 0,
             "stem-birch": 1,
             "stem-pine": 2,
@@ -29,7 +37,11 @@ class NpEncoder(json.JSONEncoder):
 
 
 def vgg_to_data_dict(img_dir):
-
+    """
+    Turns a vgg-file into detectron data dicts.
+    :param img_dir: Dir of images and the data.json file.
+    :return: Data dicts.
+    """
     with open(os.path.join(img_dir, "data.json")) as f:
         annotations = json.load(f)
 
@@ -87,6 +99,13 @@ def vgg_to_data_dict(img_dir):
 
 
 def vgg_to_coco(img_dir, file_name):
+    """
+    Turns a vgg-file into a coco-format.
+    :param img_dir: Image die.
+    :param file_name: File name of vgg-file.
+    :return: coco-format json.
+    """
+
     annotation_counter = 0
 
     coco_data = {
@@ -94,14 +113,7 @@ def vgg_to_coco(img_dir, file_name):
         "licenses": [],
         "images": [],
         "annotations": [],
-        "categories": [
-            {"supercategory": "stem", "id": 1, "name": "stem-birch"},
-            {"supercategory": "stem", "id": 1, "name": "stem-birch"},
-            {"supercategory": "stem", "id": 2, "name": "stem-pine"},
-            {"supercategory": "crown", "id": 3, "name": "crown-spruce"},
-            {"supercategory": "crown", "id": 4, "name": "crown-birch"},
-            {"supercategory": "crown", "id": 5, "name": "crown-pine"}
-        ]
+        "categories": categories
     }
 
     json_file = os.path.join(img_dir, file_name)
@@ -166,6 +178,10 @@ def vgg_to_coco(img_dir, file_name):
 
 
 def merge_coco_files(files):
+    """
+    Merges two or more coco-annotation-files into a single one.
+    :param files: List of coco-files.
+    """
     data = {}
     annotations = []
     images = []
@@ -197,6 +213,16 @@ def merge_coco_files(files):
 
 
 def vgg_val_split(image_dir, train_dir, val_dir, json_file, val_percent):
+    """
+    Takes a folder with images and its annotation data and splits into training/val.
+    Copies all the images and creates json-file in both train/val.
+    :param image_dir: Folder with all images to make the split from.
+    :param train_dir: Train dir.
+    :param val_dir: Val dir.
+    :param json_file: File with all annotation to the img dir.
+    :param val_percent: How much of the images that will end up in val. 0.2 gives 20%.
+    """
+
     with open(json_file) as in_file:
 
         vgg_dict = json.load(in_file)
@@ -213,6 +239,7 @@ def vgg_val_split(image_dir, train_dir, val_dir, json_file, val_percent):
             val_dict[img] = vgg_dict[img]
             vgg_dict.pop(img)
 
+        # Copy all files.
         for img in val_dict.keys():
             file_name = val_dict[img]["filename"]
             shutil.copy(os.path.join(image_dir, file_name), val_dir)
@@ -220,6 +247,7 @@ def vgg_val_split(image_dir, train_dir, val_dir, json_file, val_percent):
             file_name = vgg_dict[img]["filename"]
             shutil.copy(os.path.join(image_dir, file_name), train_dir)
 
+        # Create json-data split.
         with open(os.path.join(train_dir, "data.json"), "w") as out_file:
             out_file.write(json.dumps(vgg_dict, indent=4))
         with open(os.path.join(val_dir, "data.json"), "w") as out_file:

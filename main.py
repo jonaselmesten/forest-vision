@@ -1,3 +1,4 @@
+import json
 import os
 import random
 import time
@@ -15,18 +16,10 @@ from matplotlib import pyplot as plt
 
 from augmentation import image_augmentation
 from config import cfg
-from data import vgg_to_data_dict, vgg_val_split
+from annotation import vgg_to_data_dict, vgg_val_split
 from train import CustomTrainer, load_json_arr
 
-setup_logger()
 
-for mode in ["train", "val"]:
-    DatasetCatalog.register("stem_" + mode, lambda d=mode: vgg_to_data_dict("stem/" + mode))
-    MetadataCatalog.get("stem_" + mode).set(
-        thing_colors=[(250, 0, 0), (25, 255, 25), (34, 0, 204), (0, 0, 255), (0, 0, 255), (0, 0, 255)],
-        thing_classes=["spruce", "birch", "pine", "spruce-crown", "birch-crown", "pine-crown"])
-
-metadata_train = MetadataCatalog.get("stem_train")
 
 
 def show_random_annotation():
@@ -153,3 +146,4 @@ def run_prediction_on_dir(img_dir):
         run_prediction(img_dir + "/" + file, predictor)
 
 
+#vgg_val_split("imgs", "stem/train", "stem/val", "imgs/data.json", 0.2)

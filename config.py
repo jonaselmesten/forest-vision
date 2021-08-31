@@ -1,7 +1,22 @@
 import os
 
 from detectron2.config import get_cfg
+from detectron2.data import MetadataCatalog, DatasetCatalog
 from detectron2.model_zoo import model_zoo
+from detectron2.utils.logger import setup_logger
+
+from annotation import vgg_to_data_dict
+
+setup_logger()
+
+# Setup train/val datasets.
+for mode in ["train", "val"]:
+    DatasetCatalog.register("stem_" + mode, lambda d=mode: vgg_to_data_dict("stem/" + mode))
+    MetadataCatalog.get("stem_" + mode).set(
+        thing_colors=[(250, 0, 0), (25, 255, 25), (34, 0, 204), (0, 0, 255), (0, 0, 255), (0, 0, 255)],
+        thing_classes=["spruce", "birch", "pine", "spruce-crown", "birch-crown", "pine-crown"])
+
+metadata_train = MetadataCatalog.get("stem_train")
 
 cfg = get_cfg()
 cfg.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
