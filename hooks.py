@@ -14,6 +14,7 @@ class LossEvalHook(HookBase):
     """
     Hook that calculates the evaluation loss for the model.
     """
+
     def __init__(self, eval_period, model, data_loader):
         self._model = model
         self._period = eval_period
@@ -44,7 +45,6 @@ class LossEvalHook(HookBase):
             seconds_per_img = total_compute_time / iter_after_start
 
             if idx >= num_warmup * 2 or seconds_per_img > 5:
-
                 total_seconds_per_img = (time.perf_counter() - start_time) / iter_after_start
                 eta = datetime.timedelta(seconds=int(total_seconds_per_img * (total - idx - 1)))
 
@@ -111,19 +111,23 @@ class BestCheckpoint(HookBase):
         """
         if max(self.total_loss) < tot_loss:
             log_every_n(logging.WARNING,
-                        "Total loss hasn't improved. Most recent loss:", val_loss, " old loss:", max(self.total_loss))
+                        "Total loss hasn't improved. Most recent loss:" + str(tot_loss),
+                        + "old loss:" + str(max(self.total_loss)))
             return False
         if max(self.loss_box_reg) < box_loss:
             log_every_n(logging.WARNING,
-                        "Box loss hasn't improved. Most recent loss:", val_loss, " old loss:", max(self.loss_box_reg))
+                        "Box loss hasn't improved. Most recent loss:" + str(box_loss),
+                        + "old loss:" + str(max(self.loss_box_reg)))
             return False
         if max(self.loss_mask) < mask_loss:
             log_every_n(logging.WARNING,
-                        "Mask loss hasn't improved. Most recent loss:", val_loss, " old loss:", max(self.loss_mask))
+                        "Mask loss hasn't improved. Most recent loss:" + str(mask_loss),
+                        + "old loss:" + str(max(self.loss_mask)))
             return False
         if max(self.loss_val) < val_loss:
             log_every_n(logging.WARNING,
-                        "Valuation loss hasn't improved. Most recent loss:", val_loss, " old loss:", max(self.loss_val))
+                        "Val loss hasn't improved. Most recent loss:" + str(val_loss),
+                        + "old loss:" + str(max(self.loss_val)))
             return False
 
         return True
@@ -162,5 +166,3 @@ class BestCheckpoint(HookBase):
             self.loss_box_reg.append(metric["loss_box_reg"])
             self.loss_mask.append(metric["loss_mask"])
             self.loss_val.append(metric["validation_loss"])
-
-

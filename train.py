@@ -6,7 +6,7 @@ from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator
 
 from augmentation import image_augmentation
-from config import cfg
+from config import cfg_instance
 from hooks import LossEvalHook, BestCheckpoint
 
 
@@ -27,7 +27,7 @@ class CustomTrainer(DefaultTrainer):
 
         hooks.insert(-1, LossEvalHook(
 
-            cfg.TEST.EVAL_PERIOD,
+            cfg_instance.TEST.EVAL_PERIOD,
             self.model,
 
             build_detection_test_loader(
@@ -37,7 +37,7 @@ class CustomTrainer(DefaultTrainer):
             )
         ))
 
-        hooks.append(BestCheckpoint(cfg.TEST.EVAL_PERIOD))
+        hooks.append(BestCheckpoint(cfg_instance.TEST.EVAL_PERIOD))
 
         return hooks
 

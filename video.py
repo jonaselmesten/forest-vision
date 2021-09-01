@@ -4,7 +4,7 @@ from detectron2.engine import DefaultPredictor
 from detectron2.utils.video_visualizer import VideoVisualizer
 from detectron2.utils.visualizer import Visualizer, ColorMode
 
-from config import cfg
+from config import cfg_instance
 from main import metadata_train
 
 video = cv2.VideoCapture("forest.mp4")
@@ -25,8 +25,8 @@ visualizer = VideoVisualizer(metadata=metadata_train)
 
 
 def run_on_video(vid, max_frame_count, threshold=0.75):
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold
-    predictor = DefaultPredictor(cfg)
+    cfg_instance.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold
+    predictor = DefaultPredictor(cfg_instance)
 
     read_frames = 0
 
