@@ -1,23 +1,15 @@
-import json
-import logging
 import os
 import random
-import time
 
 import cv2
-import numpy
-from PIL.Image import fromarray
-from detectron2.data import MetadataCatalog, DatasetCatalog
-from detectron2.engine import DefaultPredictor
-from detectron2.engine import DefaultTrainer
-from detectron2.structures import BoxMode, Boxes
-from detectron2.utils.logger import setup_logger, log_every_n
-from detectron2.utils.visualizer import Visualizer, ColorMode
+from detectron2.structures import BoxMode
+from detectron2.utils.visualizer import Visualizer
 from matplotlib import pyplot as plt
 
+from annotation import vgg_to_data_dict
 from augmentation import image_augmentation
 from config import cfg, metadata_train
-from annotation import vgg_to_data_dict, vgg_val_split
+from predict import run_batch_prediction
 from train import CustomTrainer, load_json_arr
 
 
@@ -114,42 +106,11 @@ def show_augmentation():
         cv2.waitKey()
 
 
-def run_prediction(img, predictor):
-    cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7
-    cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")  # path to the model we just trained
 
-    img = cv2.imread(img)
-    win_name = "Prediction"
-
-    start_time = time.time()
-    outputs = predictor(img)
-    print("--- %s seconds ---" % (time.time() - start_time))
-
-    classes = outputs["instances"].pred_classes
-    print(classes)
-    print("Classes:", len(classes))
-
-    v = Visualizer(img[:, :, ::-1],
-                   MetadataCatalog.get("stem_train"),
-                   instance_mode=ColorMode(1))
-
-    out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-    out = out.get_image()[:, :, ::-1]
-    cv2.imshow(win_name, out)
-    cv2.resizeWindow(win_name, 800, 600)
-    cv2.waitKey()
-
-
-def run_prediction_on_dir(img_dir):
-    for file in os.listdir(img_dir):
-        if file.split(".")[1] == "json":
-            continue
-        cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7  # set a custom testing threshold
-        predictor = DefaultPredictor(cfg)
-        run_prediction(img_dir + "/" + file, predictor)
 
 
 show_augmentation()
+#run_batch_prediction("stem/train", num_of_img=4, num_of_cycles=25)
 
 # run_prediction_on_dir("stem/val")
 # vgg_val_split("imgs", "stem/train", "stem/val", "imgs/data.json", 0.2)
