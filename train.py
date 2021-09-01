@@ -4,11 +4,10 @@ import os
 from detectron2.data import build_detection_train_loader, build_detection_test_loader, DatasetMapper
 from detectron2.engine import DefaultTrainer
 from detectron2.evaluation import COCOEvaluator
-from matplotlib import pyplot as plt
 
 from augmentation import image_augmentation
 from config import cfg
-from hooks import LossEvalHook
+from hooks import LossEvalHook, BestCheckpoint
 
 
 class CustomTrainer(DefaultTrainer):
@@ -37,6 +36,9 @@ class CustomTrainer(DefaultTrainer):
                 DatasetMapper(self.cfg, True)
             )
         ))
+
+        hooks.append(BestCheckpoint(cfg.TEST.EVAL_PERIOD))
+
         return hooks
 
 

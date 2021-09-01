@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import random
 import time
@@ -10,16 +11,14 @@ from detectron2.data import MetadataCatalog, DatasetCatalog
 from detectron2.engine import DefaultPredictor
 from detectron2.engine import DefaultTrainer
 from detectron2.structures import BoxMode, Boxes
-from detectron2.utils.logger import setup_logger
+from detectron2.utils.logger import setup_logger, log_every_n
 from detectron2.utils.visualizer import Visualizer, ColorMode
 from matplotlib import pyplot as plt
 
 from augmentation import image_augmentation
-from config import cfg
+from config import cfg, metadata_train
 from annotation import vgg_to_data_dict, vgg_val_split
 from train import CustomTrainer, load_json_arr
-
-
 
 
 def show_random_annotation():
@@ -34,12 +33,7 @@ def show_random_annotation():
         cv2.waitKey()
 
 
-def train():
-    os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
-    trainer = CustomTrainer(cfg)
-    trainer.resume_or_load(resume=False)
-    trainer.train()
-
+def show_train_graph():
     experiment_metrics = load_json_arr(cfg.OUTPUT_DIR + '/metrics.json')
 
     fig, (ax1, ax2) = plt.subplots(1, 2)
@@ -67,21 +61,34 @@ def train():
     plt.show()
 
 
+def train(show_graphs=True):
+    os.makedirs(cfg.OUTPUT_DIR, exist_ok=True)
+    trainer = CustomTrainer(cfg)
+    trainer.resume_or_load(resume=False)
+    trainer.train()
+    show_train_graph()
+
+
 def show_augmentation():
     dataset_dicts = vgg_to_data_dict("stem/train")
 
-    for data_dict in random.sample(dataset_dicts, 3):
+    for data_dict in random.sample(dataset_dicts, 100):
 
         data_dict_aug = image_augmentation(data_dict)
         instance = data_dict_aug["instances"]
 
         bboxes = instance.gt_boxes
+        len_bboxes = len(bboxes)
         classes = instance.gt_classes
         polygon_masks = instance.gt_masks
 
         annotations = []
 
+        # Gather annotation data.
         for i in range(len(data_dict["annotations"])):
+
+            if i >= len_bboxes:
+                break
 
             bbox = bboxes[i].tensor.tolist()[0]
             category_id = classes[0].tolist()
@@ -98,12 +105,9 @@ def show_augmentation():
                                 "category_id": category_id})
 
         data_dict["annotations"] = annotations
+        image = data_dict_aug["image"]
 
-        tensor = data_dict_aug["image"][0]
-        pil_image = fromarray(tensor.numpy())
-        img = cv2.cvtColor(numpy.array(pil_image), cv2.COLOR_RGB2BGR)
-
-        visualizer = Visualizer(img[:, :, ::-1], metadata=metadata_train, scale=0.5)
+        visualizer = Visualizer(image[:, :, ::-1], metadata=metadata_train, scale=0.8)
         out = visualizer.draw_dataset_dict(data_dict)
 
         cv2.imshow("Augmented image", out.get_image()[:, :, ::-1])
@@ -127,7 +131,6 @@ def run_prediction(img, predictor):
 
     v = Visualizer(img[:, :, ::-1],
                    MetadataCatalog.get("stem_train"),
-                   scale=0.8,
                    instance_mode=ColorMode(1))
 
     out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
@@ -146,4 +149,7 @@ def run_prediction_on_dir(img_dir):
         run_prediction(img_dir + "/" + file, predictor)
 
 
-#vgg_val_split("imgs", "stem/train", "stem/val", "imgs/data.json", 0.2)
+show_augmentation()
+
+# run_prediction_on_dir("stem/val")
+# vgg_val_split("imgs", "stem/train", "stem/val", "imgs/data.json", 0.2)

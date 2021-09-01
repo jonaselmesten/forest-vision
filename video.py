@@ -1,31 +1,30 @@
-import time
-
 import cv2
+from detectron2.data import MetadataCatalog
 from detectron2.engine import DefaultPredictor
 from detectron2.utils.video_visualizer import VideoVisualizer
+from detectron2.utils.visualizer import Visualizer, ColorMode
 
 from config import cfg
 from main import metadata_train
 
-video = cv2.VideoCapture("for.mp4")
+video = cv2.VideoCapture("forest.mp4")
 width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
 height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
 frames_per_second = video.get(cv2.CAP_PROP_FPS)
 num_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
 
-video_writer = cv2.VideoWriter('out.mp4',
+max_frames = num_frames // 3
+
+video_writer = cv2.VideoWriter('forest_out.mp4',
                                fourcc=cv2.VideoWriter_fourcc(*"mp4v"),
                                fps=float(frames_per_second),
                                frameSize=(width, height),
                                isColor=True)
 
-num_frames = 300
-write_to_file = False
 visualizer = VideoVisualizer(metadata=metadata_train)
 
 
-def run_on_video(vid, max_frames, threshold=0.6):
-
+def run_on_video(vid, max_frame_count, threshold=0.75):
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold
     predictor = DefaultPredictor(cfg)
 
@@ -33,38 +32,32 @@ def run_on_video(vid, max_frames, threshold=0.6):
 
     while True:
 
-        start_time = time.time()
-
         has_frame, img = vid.read()
 
         if not has_frame:
             break
 
         outputs = predictor(img)
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
-        prediction = visualizer.draw_instance_predictions(img, outputs["instances"].to("cpu"))
+        v = Visualizer(img[:, :, ::-1],
+                       MetadataCatalog.get("stem_train"),
+                       instance_mode=ColorMode(1))
 
-        # Convert Matplotlib RGB format to OpenCV BGR format
-        prediction = cv2.cvtColor(prediction.get_image(), cv2.COLOR_RGB2BGR)
+        out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
+        prediction = out.get_image()[:, :, ::-1]
 
-        print("--- %s seconds ---" % (time.time() - start_time))
         yield prediction
 
         read_frames += 1
-        if read_frames > max_frames:
+        if read_frames > max_frame_count:
             break
 
 
-for frame in run_on_video(video, num_frames):
+count = 0
 
-    cv2.namedWindow("Video", cv2.WINDOW_NORMAL)
-    cv2.imshow("Video", frame)
+for frame in run_on_video(video, max_frames):
+    print("Frame ", count, " of total:", num_frames // 3)
+    count += 1
+    video_writer.write(frame)
 
-    if cv2.waitKey(1) == 27:
-        break
-    if write_to_file:
-        video_writer.write(frame)
-
-video.release()
-video_writer.release()
 cv2.destroyAllWindows()
+video_writer.release()
