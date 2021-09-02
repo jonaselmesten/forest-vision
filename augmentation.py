@@ -9,7 +9,7 @@ from detectron2.structures import BoxMode
 from detectron2.utils.visualizer import Visualizer
 
 from annotation import vgg_to_data_dict
-from model import metadata_train
+from model.config import metadata_train
 
 
 def image_augmentation(dataset_dict):

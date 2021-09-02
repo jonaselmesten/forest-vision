@@ -6,6 +6,7 @@ from detectron2.model_zoo import model_zoo
 from detectron2.utils.logger import setup_logger
 
 from annotation import vgg_to_data_dict
+from config import get_config_file, get_model_weights
 
 setup_logger()
 
@@ -28,7 +29,7 @@ for mode in ["train", "val"]:
 metadata_train = MetadataCatalog.get("stem_train")
 
 cfg_instance = get_cfg()
-cfg_instance.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml"))
+cfg_instance.merge_from_file(get_config_file("instance/mask_rcnn_R_50_FPN_3x.yaml"))
 cfg_instance.DATASETS.TRAIN = ("stem_train",)
 cfg_instance.DATASETS.TEST = ("stem_val",)
 cfg_instance.TEST.EVAL_PERIOD = 10
@@ -36,7 +37,7 @@ cfg_instance.MODEL.DEVICE = "cuda"
 
 cfg_instance.DATALOADER.NUM_WORKERS = 2
 #cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")  # Let training initialize from model zoo
-cfg_instance.MODEL.WEIGHTS = os.path.join(cfg_instance.OUTPUT_DIR, "model_best_4500.pth")
+cfg_instance.MODEL.WEIGHTS = get_model_weights("model_best_4500.pth")
 cfg_instance.MODEL.ROI_HEADS.NUM_CLASSES = 6
 
 cfg_instance.SOLVER.IMS_PER_BATCH = 1

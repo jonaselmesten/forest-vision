@@ -1,20 +1,10 @@
 import os
-import random
 
-import cv2
-from detectron2.data import MetadataCatalog
-from detectron2.structures import BoxMode
-from detectron2.utils.visualizer import Visualizer, ColorMode
 from matplotlib import pyplot as plt
 
-from annotation import vgg_to_data_dict
-from augmentation import image_augmentation
-from model import cfg_instance, metadata_train, cfg_semantic
-from trainer import CustomTrainer, load_json_arr
-from visualize import CustomVisualizer
-
-
-
+from model.config import cfg_instance
+from model.trainer import CustomTrainer, load_json_arr
+from demo import run_instance_prediction_on_dir
 
 
 def show_train_graph():
@@ -54,12 +44,11 @@ def train(show_graphs=True):
 
 
 
-
-
 #train()
-run_instance_batch_prediction("stem/train", num_of_img=4, num_of_cycles=3)
+#run_instance_batch_prediction("stem/train", num_of_img=4, num_of_cycles=3)
 
-#run_instance_prediction_on_dir("stem/val")
+run_instance_prediction_on_dir("stem/val")
+
 # vgg_val_split("imgs", "stem/train", "stem/val", "imgs/data.json", 0.2)
 
 

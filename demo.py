@@ -5,8 +5,8 @@ import cv2
 from detectron2.data import MetadataCatalog
 from detectron2.utils.visualizer import Visualizer, ColorMode
 
-from model import cfg_instance, cfg_semantic
-from predictor import SemanticPredictor, InstancePredictor
+from model.config import cfg_instance, cfg_semantic
+from model.predictor import SemanticPredictor, InstancePredictor
 from visualize import CustomVisualizer
 
 
@@ -87,9 +87,8 @@ def run_semantic_instance_prediction():
 
 
 def run_instance_prediction(img, predictor):
+
     cfg_instance.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.7
-    cfg_instance.MODEL.WEIGHTS = os.path.join(cfg_instance.OUTPUT_DIR,
-                                              "model_final.pth")
 
     img = cv2.imread(img)
     win_name = "Prediction"

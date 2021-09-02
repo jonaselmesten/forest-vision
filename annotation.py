@@ -10,8 +10,6 @@ import numpy as np
 from detectron2.structures import BoxMode
 from detectron2.utils.visualizer import Visualizer
 
-from model import metadata_train
-
 categories = [
             {"supercategory": "stem", "id": 0, "name": "stem-birch"},
             {"supercategory": "stem", "id": 1, "name": "stem-birch"},
@@ -257,7 +255,7 @@ def vgg_val_split(image_dir, train_dir, val_dir, json_file, val_percent):
             out_file.write(json.dumps(val_dict, indent=4))
 
 
-def show_random_instance_annotation():
+def show_random_instance_annotation(metadata_train):
     data_dicts = vgg_to_data_dict("stem/train")
 
     for data in random.sample(data_dicts, 3):

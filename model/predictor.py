@@ -1,16 +1,8 @@
-import os
-import time
-
-import cv2
 import detectron2.data.transforms as T
 import torch
 from detectron2.checkpoint import DetectionCheckpointer
 from detectron2.data import MetadataCatalog
 from detectron2.modeling import build_model
-from detectron2.utils.visualizer import Visualizer, ColorMode
-
-from model import cfg_instance, cfg_semantic
-from visualize import CustomVisualizer
 
 
 class SemanticInstancePredictor:
@@ -227,7 +219,3 @@ class SemanticPredictor:
             predictions = self.model(input_list)[0]
 
         return predictions
-
-
-
-

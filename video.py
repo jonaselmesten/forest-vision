@@ -1,12 +1,7 @@
-import time
-
 import cv2
-from detectron2.data import MetadataCatalog
-from detectron2.utils.visualizer import ColorMode
 
 from model import cfg_instance, cfg_semantic
-from predictor import InstancePredictor, SemanticPredictor, SemanticInstancePredictor
-from visualize import CustomVisualizer
+from model.predictor import SemanticInstancePredictor
 
 video = cv2.VideoCapture("forest.mp4")
 width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
