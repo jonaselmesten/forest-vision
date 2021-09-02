@@ -5,36 +5,17 @@ import numpy as np
 import torch
 from detectron2.data import MetadataCatalog
 from detectron2.utils.colormap import random_color
-from detectron2.utils.visualizer import VisImage, _OFF_WHITE, _create_text_labels, _PanopticPrediction, ColorMode, \
-    GenericMask, _SMALL_OBJECT_AREA_THRESH, Visualizer
+from detectron2.utils.visualizer import Visualizer, ColorMode, VisImage, _create_text_labels, GenericMask, \
+    _PanopticPrediction, _OFF_WHITE
 
 logger = logging.getLogger(__name__)
 
 
 class CustomVisualizer(Visualizer):
     """
-    Visualizer that draws data about detection/segmentation on images.
-
-    It contains methods like `draw_{text,box,circle,line,binary_mask,polygon}`
-    that draw primitive objects to images, as well as high-level wrappers like
-    `draw_{instance_predictions,sem_seg,panoptic_seg_predictions,dataset_dict}`
-    that draw composite data in some pre-defined style.
-
-    Note that the exact visualization style for the high-level wrappers are subject to change.
-    Style such as color, opacity, label contents, visibility of labels, or even the visibility
-    of objects themselves (e.g. when the object is too small) may change according
-    to different heuristics, as long as the results still look visually reasonable.
-
-    To obtain a consistent style, you can implement custom drawing functions with the
-    abovementioned primitive methods instead. If you need more customized visualization
-    styles, you can process the data yourself following their format documented in
-    tutorials (:doc:`/tutorials/models`, :doc:`/tutorials/datasets`). This class does not
-    intend to satisfy everyone's preference on drawing styles.
-
     This visualizer focuses on high rendering quality rather than performance. It is not
     designed to be used for real-time applications.
     """
-
     def __init__(self, img_rgb, metadata=None, metadata_semantic=None, scale=1.0, instance_mode=ColorMode.IMAGE):
         """
         Args:
@@ -47,7 +28,10 @@ class CustomVisualizer(Visualizer):
             instance_mode (ColorMode): defines one of the pre-defined style for drawing
                 instances on an image.
         """
+
+        super().__init__(img_rgb, metadata, scale, instance_mode)
         self.img = np.asarray(img_rgb).clip(0, 255).astype(np.uint8)
+
         if metadata is None:
             metadata = MetadataCatalog.get("__nonexist__")
         self.metadata = metadata

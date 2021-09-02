@@ -8,9 +8,12 @@ import os
 
 import numpy as np
 from detectron2.structures import BoxMode
+from detectron2.utils.visualizer import Visualizer
+
+from model import metadata_train
 
 categories = [
-            {"supercategory": "stem", "id": 1, "name": "stem-birch"},
+            {"supercategory": "stem", "id": 0, "name": "stem-birch"},
             {"supercategory": "stem", "id": 1, "name": "stem-birch"},
             {"supercategory": "stem", "id": 2, "name": "stem-pine"},
             {"supercategory": "crown", "id": 3, "name": "crown-spruce"},
@@ -47,7 +50,7 @@ def vgg_to_data_dict(img_dir):
 
     dataset_dicts = []
 
-    for id, values in enumerate(annotations.values()):
+    for img_id, values in enumerate(annotations.values()):
 
         data_dict = {}
 
@@ -61,7 +64,7 @@ def vgg_to_data_dict(img_dir):
         height, width = cv2.imread(file_name).shape[:2]
 
         data_dict["file_name"] = file_name
-        data_dict["image_id"] = id
+        data_dict["image_id"] = img_id
         data_dict["height"] = height
         data_dict["width"] = width
 
@@ -100,7 +103,7 @@ def vgg_to_data_dict(img_dir):
 
 def vgg_to_coco(img_dir, file_name):
     """
-    Turns a vgg-file into a coco-format.
+    Turns a vgg-file into coco-format.
     :param img_dir: Image die.
     :param file_name: File name of vgg-file.
     :return: coco-format json.
@@ -121,17 +124,17 @@ def vgg_to_coco(img_dir, file_name):
     with open(json_file) as f:
         file_annotation = json.load(f)
 
-    for idx, v in enumerate(file_annotation.values()):
+    for img_id, values in enumerate(file_annotation.values()):
         record = {}
 
         try:
-            filename = os.path.join(img_dir, v["filename"])
+            filename = os.path.join(img_dir, values["filename"])
             height, width = cv2.imread(filename).shape[:2]
         except AttributeError as e:
             continue
 
         record["file_name"] = filename
-        record["image_id"] = idx
+        record["image_id"] = img_id
         record["height"] = height
         record["width"] = width
 
@@ -139,10 +142,10 @@ def vgg_to_coco(img_dir, file_name):
             "file_name": filename,
             "height": height,
             "width": width,
-            "id": idx
+            "id": img_id
         })
 
-        data = v["regions"]
+        data = values["regions"]
 
         if len(data) == 0:
             continue
@@ -164,7 +167,7 @@ def vgg_to_coco(img_dir, file_name):
                 "segmentation": [poly],
                 "iscrowd": 0,
                 "bbox_mode": BoxMode.XYXY_ABS,
-                "image_id": idx,
+                "image_id": img_id,
                 "bbox": [min(px), min(py), max(px), max(py)],
                 "category_id": class_id[class_name],
                 "id": annotation_counter
@@ -252,3 +255,15 @@ def vgg_val_split(image_dir, train_dir, val_dir, json_file, val_percent):
             out_file.write(json.dumps(vgg_dict, indent=4))
         with open(os.path.join(val_dir, "data.json"), "w") as out_file:
             out_file.write(json.dumps(val_dict, indent=4))
+
+
+def show_random_instance_annotation():
+    data_dicts = vgg_to_data_dict("stem/train")
+
+    for data in random.sample(data_dicts, 3):
+        img = cv2.imread(data["file_name"])
+        visualizer = Visualizer(img[:, :, ::-1], metadata=metadata_train, scale=0.5)
+        out = visualizer.draw_dataset_dict(data)
+
+        cv2.imshow("Annotations", out.get_image()[:, :, ::-1])
+        cv2.waitKey()

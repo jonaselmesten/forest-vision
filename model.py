@@ -1,6 +1,5 @@
 import os
 
-import pycocotools.coco
 from detectron2.config import get_cfg
 from detectron2.data import MetadataCatalog, DatasetCatalog
 from detectron2.model_zoo import model_zoo
@@ -15,6 +14,7 @@ setup_logger()
 cfg_semantic = get_cfg()
 cfg_semantic.merge_from_file(model_zoo.get_config_file("COCO-PanopticSegmentation/panoptic_fpn_R_101_3x.yaml"))
 cfg_semantic.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-PanopticSegmentation/panoptic_fpn_R_101_3x.yaml")
+cfg_semantic.MODEL.DEVICE = "cuda"
 
 # Instance ---------------------------------------------------------------
 
@@ -32,11 +32,11 @@ cfg_instance.merge_from_file(model_zoo.get_config_file("COCO-InstanceSegmentatio
 cfg_instance.DATASETS.TRAIN = ("stem_train",)
 cfg_instance.DATASETS.TEST = ("stem_val",)
 cfg_instance.TEST.EVAL_PERIOD = 10
+cfg_instance.MODEL.DEVICE = "cuda"
 
 cfg_instance.DATALOADER.NUM_WORKERS = 2
 #cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")  # Let training initialize from model zoo
-#cfg.MODEL.WEIGHTS = os.path.join(cfg.OUTPUT_DIR, "model_final.pth")
-cfg_instance.MODEL.WEIGHTS = os.path.join(cfg_instance.OUTPUT_DIR, "colab_model.pth")
+cfg_instance.MODEL.WEIGHTS = os.path.join(cfg_instance.OUTPUT_DIR, "model_best_4500.pth")
 cfg_instance.MODEL.ROI_HEADS.NUM_CLASSES = 6
 
 cfg_instance.SOLVER.IMS_PER_BATCH = 1
