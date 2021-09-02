@@ -4,7 +4,8 @@ from matplotlib import pyplot as plt
 
 from model.config import cfg_instance
 from model.trainer import CustomTrainer, load_json_arr
-from demo import run_instance_prediction_on_dir
+from demo import run_instance_prediction_on_dir, run_semantic_prediction_on_dir, run_semantic_instance_prediction, \
+    run_semantic_instance_prediction_on_dir
 
 
 def show_train_graph():
@@ -47,7 +48,9 @@ def train(show_graphs=True):
 #train()
 #run_instance_batch_prediction("stem/train", num_of_img=4, num_of_cycles=3)
 
-run_instance_prediction_on_dir("stem/val")
+#run_instance_prediction_on_dir("stem/val")
+#run_semantic_prediction_on_dir("stem/val")
+run_semantic_instance_prediction_on_dir("stem/val")
 
 # vgg_val_split("imgs", "stem/train", "stem/val", "imgs/data.json", 0.2)
 
