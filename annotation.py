@@ -5,6 +5,10 @@ import random
 import cv2
 import json
 import os
+from pathlib import Path
+
+import tqdm
+from PIL import Image
 
 import numpy as np
 from detectron2.structures import BoxMode
@@ -35,6 +39,29 @@ class NpEncoder(json.JSONEncoder):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         return super(NpEncoder, self).default(obj)
+
+
+def convert(input, output):
+    img = np.asarray(Image.open(input))
+    assert img.dtype == np.uint8
+    img = img - 1  # 0 (ignore) becomes 255. others are shifted by 1
+    Image.fromarray(img).save(output)
+
+
+def ade20k_dataset_read():
+
+    dataset_dir = Path(os.getenv("DETECTRON2_DATASETS", "datasets")) / "ADEChallengeData2016"
+
+    for name in ["training", "validation"]:
+
+        annotation_dir = dataset_dir / "annotations" / name
+        output_dir = dataset_dir / "annotations_detectron2" / name
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        for file in tqdm.tqdm(list(annotation_dir.iterdir())):
+            output_file = output_dir / file.name
+            print(output_file)
+            convert(file, output_file)
 
 
 def vgg_to_data_dict(img_dir):

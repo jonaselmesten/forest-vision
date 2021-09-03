@@ -11,11 +11,12 @@ from detectron2.utils.visualizer import Visualizer, ColorMode, VisImage, _create
 logger = logging.getLogger(__name__)
 
 
-class SemInstVisualizer(Visualizer):
+class CustomVisualizer(Visualizer):
     """
     This visualizer focuses on high rendering quality rather than performance. It is not
     designed to be used for real-time applications.
     """
+
     def __init__(self, img_rgb, metadata=None, metadata_semantic=None, scale=1.0, instance_mode=ColorMode.IMAGE):
         """
         Args:
@@ -44,8 +45,6 @@ class SemInstVisualizer(Visualizer):
             np.sqrt(self.output.height * self.output.width) // 90, 10 // scale
         )
         self._instance_mode = instance_mode
-
-
 
     def draw_instance_predictions(self, predictions, remove_box=True):
         """
@@ -171,7 +170,7 @@ class SemInstVisualizer(Visualizer):
 
         return self.output
 
-    def draw_sem_seg(self, sem_seg, area_threshold=None, alpha=0.8):
+    def draw_sem_seg(self, sem_seg, area_threshold=10000, alpha=0.4):
         """
         Draw semantic segmentation predictions/labels.
 
@@ -186,25 +185,31 @@ class SemInstVisualizer(Visualizer):
         """
         if isinstance(sem_seg, torch.Tensor):
             sem_seg = sem_seg.numpy()
+
         labels, areas = np.unique(sem_seg, return_counts=True)
         sorted_idxs = np.argsort(-areas).tolist()
         labels = labels[sorted_idxs]
+
         for label in filter(lambda l: l < len(self.metadata_semantic.stuff_classes), labels):
-            try:
-                mask_color = [x / 255 for x in self.metadata_semantic.stuff_colors[label]]
-            except (AttributeError, IndexError):
+
+            label_name = self.metadata_semantic.stuff_classes[label]
+
+            if label_name in self.metadata_semantic.stuff_colors:
+                mask_color = [x / 255 for x in self.metadata_semantic.stuff_colors[label_name]]
+            else:
                 mask_color = None
 
             binary_mask = (sem_seg == label).astype(np.uint8)
-            text = self.metadata_semantic.stuff_classes[label]
+
             self.draw_binary_mask(
                 binary_mask,
                 color=mask_color,
                 edge_color=_OFF_WHITE,
-                text=text,
+                text=label_name,
                 alpha=alpha,
                 area_threshold=area_threshold,
             )
+
         return self.output
 
     def overlay_instances(

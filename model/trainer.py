@@ -7,7 +7,7 @@ from detectron2.evaluation import COCOEvaluator
 
 from augmentation import image_augmentation
 from model.config import cfg_instance
-from model.hooks import LossEvalHook
+from model.hooks import LossEvalHook, BestCheckpoint
 
 
 class CustomTrainer(DefaultTrainer):

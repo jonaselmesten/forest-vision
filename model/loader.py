@@ -138,9 +138,9 @@ def load_per_pixel_baseline_plus_R50_bs16_160k():
     cfg.freeze()
     return cfg
 
-def load_pan():
+
+def load_panoptic_fpn_R_101_3x():
     cfg = get_cfg()
     cfg.merge_from_file(model_zoo.get_config_file("COCO-PanopticSegmentation/panoptic_fpn_R_101_3x.yaml"))
     cfg.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-PanopticSegmentation/panoptic_fpn_R_101_3x.yaml")
-
     return cfg
