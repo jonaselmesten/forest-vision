@@ -96,10 +96,10 @@ class BestCheckpoint(HookBase):
         :param interval: Iteration interval to check for improvement.
         """
         self.interval = interval
-        self.total_loss = deque(maxlen=3)
-        self.loss_box_reg = deque(maxlen=3)
-        self.loss_mask = deque(maxlen=3)
-        self.loss_val = deque(maxlen=3)
+        self.total_loss = list()
+        self.loss_box_reg = list()
+        self.loss_mask = list()
+        self.loss_val = list()
         self.last_save = 0
 
     def _is_best(self, tot_loss, box_loss, mask_loss, val_loss):
@@ -109,22 +109,22 @@ class BestCheckpoint(HookBase):
         not be saved as.
         :return: True if best, false if otherwise.
         """
-        if max(self.total_loss) < tot_loss:
+        if min(self.total_loss) < tot_loss:
             log_every_n(logging.WARNING,
                         "Total loss hasn't improved. Most recent loss:" + str(tot_loss),
                         + "old loss:" + str(max(self.total_loss)))
             return False
-        if max(self.loss_box_reg) < box_loss:
+        if min(self.loss_box_reg) < box_loss:
             log_every_n(logging.WARNING,
                         "Box loss hasn't improved. Most recent loss:" + str(box_loss),
                         + "old loss:" + str(max(self.loss_box_reg)))
             return False
-        if max(self.loss_mask) < mask_loss:
+        if min(self.loss_mask) < mask_loss:
             log_every_n(logging.WARNING,
                         "Mask loss hasn't improved. Most recent loss:" + str(mask_loss),
                         + "old loss:" + str(max(self.loss_mask)))
             return False
-        if max(self.loss_val) < val_loss:
+        if min(self.loss_val) < val_loss:
             log_every_n(logging.WARNING,
                         "Val loss hasn't improved. Most recent loss:" + str(val_loss),
                         + "old loss:" + str(max(self.loss_val)))
@@ -155,7 +155,7 @@ class BestCheckpoint(HookBase):
 
             if len(self.total_loss) > 0:
                 if self._is_best(tot_loss, box_loss, mask_loss, val_loss):
-                    self.trainer.checkpointer.save("model_best")
+                    self.trainer.checkpointer.save("model_best_" + str(next_iter))
                     self.last_save = next_iter
                     log_every_n(logging.INFO, "Best model saved.")
                 else:
