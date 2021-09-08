@@ -1,8 +1,9 @@
+import json
 import os
 
 from matplotlib import pyplot as plt
 
-from annotation import ade20k_dataset_read
+from annotation import ade20k_dataset_read, vgg_val_split
 from model.config import cfg_instance
 from model.trainer import CustomTrainer, load_json_arr
 from demo import run_instance_prediction_on_dir, run_semantic_prediction_on_dir, run_panoptic_instance_prediction, \
@@ -51,9 +52,9 @@ def train(show_graphs=True):
 
 #run_instance_prediction_on_dir("stem/val")
 #run_semantic_prediction_on_dir("stem/val")
-run_semantic_instance_prediction_on_dir("stem/val")
+#run_semantic_instance_prediction_on_dir("stem/val")
 
-# vgg_val_split("imgs", "stem/train", "stem/val", "imgs/data.json", 0.2)
+vgg_val_split("trees", "stem/train", "stem/val", "trees/data.json", 0.2)
 
 
 

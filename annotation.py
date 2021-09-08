@@ -267,6 +267,11 @@ def vgg_val_split(image_dir, train_dir, val_dir, json_file, val_percent):
             val_dict[img] = vgg_dict[img]
             vgg_dict.pop(img)
 
+        for file_name in key_list:
+            if exists(os.path.join(image_dir, file_name)):
+                raise IOError("Files does not exist in directory.")
+
+        print("Copying files...")
         # Copy all files.
         for img in val_dict.keys():
             file_name = val_dict[img]["filename"]
@@ -275,6 +280,7 @@ def vgg_val_split(image_dir, train_dir, val_dir, json_file, val_percent):
             file_name = vgg_dict[img]["filename"]
             shutil.copy(os.path.join(image_dir, file_name), train_dir)
 
+        print("Creating JSON files...")
         # Create json-data split.
         with open(os.path.join(train_dir, "data.json"), "w") as out_file:
             out_file.write(json.dumps(vgg_dict, indent=4))
