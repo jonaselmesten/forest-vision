@@ -22,13 +22,13 @@ def image_augmentation(dataset_dict):
     image = utils.read_image(dataset_dict["file_name"], format="BGR")
 
     transform_list = [
-        T.RandomCrop(crop_type="relative_range", crop_size=[0.9, 0.8]),
-        T.RandomBrightness(0.9, 1.3),
-        T.RandomContrast(0.8, 1.5),
-        T.RandomSaturation(1.0, 1.4),
+        T.RandomCrop(crop_type="relative_range", crop_size=[0.95, 0.87]),
+        T.RandomBrightness(0.9, 1.5),
+        T.RandomContrast(0.8, 1.6),
+        T.RandomSaturation(1.0, 1.6),
         T.RandomRotation(angle=[15, 0, 5, 6, 15], expand=False),
         T.RandomFlip(prob=0.5, horizontal=True, vertical=False),
-        # T.ResizeScale(1.0, 2.0, target_height=900, target_width=700)
+        T.ResizeScale(1.0, 2.0, target_height=900, target_width=700)
     ]
 
     image, transforms = T.apply_transform_gens(transform_list, image)
