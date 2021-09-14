@@ -95,8 +95,19 @@ def run_panoptic_instance_prediction(img):
     cv2.waitKey()
 
 
-def run_semantic_instance_prediction(img):
+def run_semantic_instance_prediction(img, threshold=0.8, resize=100):
+
+    cfg_instance.MODEL.ROI_HEADS.SCORE_THRESH_TEST = threshold
+
     img = cv2.imread(img)
+
+    if resize < 100:
+        scale_percent = resize
+        width = int(img.shape[1] * scale_percent / 100)
+        height = int(img.shape[0] * scale_percent / 100)
+        dim = (width, height)
+        img = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+
     win_name = "Prediction"
 
     instance_predictor = InstancePredictor(cfg_instance)
