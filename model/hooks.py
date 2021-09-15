@@ -111,22 +111,22 @@ class BestCheckpoint(HookBase):
         """
         if min(self.total_loss) < tot_loss:
             log_every_n(logging.WARNING,
-                        "Total loss hasn't improved. Most recent loss:" + str(tot_loss),
+                        "Total loss hasn't improved. Most recent loss:" + str(tot_loss)
                         + "old loss:" + str(max(self.total_loss)))
             return False
         if min(self.loss_box_reg) < box_loss:
             log_every_n(logging.WARNING,
-                        "Box loss hasn't improved. Most recent loss:" + str(box_loss),
+                        "Box loss hasn't improved. Most recent loss:" + str(box_loss)
                         + "old loss:" + str(max(self.loss_box_reg)))
             return False
         if min(self.loss_mask) < mask_loss:
             log_every_n(logging.WARNING,
-                        "Mask loss hasn't improved. Most recent loss:" + str(mask_loss),
+                        "Mask loss hasn't improved. Most recent loss:" + str(mask_loss)
                         + "old loss:" + str(max(self.loss_mask)))
             return False
         if min(self.loss_val) < val_loss:
             log_every_n(logging.WARNING,
-                        "Val loss hasn't improved. Most recent loss:" + str(val_loss),
+                        "Val loss hasn't improved. Most recent loss:" + str(val_loss)
                         + "old loss:" + str(max(self.loss_val)))
             return False
 
